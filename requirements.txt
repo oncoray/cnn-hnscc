@@ -1,0 +1,13 @@
+keras==2.2.4
+lifelines>=0.22.0
+matplotlib
+nibabel
+numpy
+pandas
+pillow
+statsmodels
+tensorflow
+keras_vis
+innvestigate
+seaborn
+batchgenerators
