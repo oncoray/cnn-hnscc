@@ -9,7 +9,6 @@ import pandas as pd
 import os
 
 
-
 # read the outcome information and store it as pd.DataFrame
 id_col = "ID_Radiomics"
 time_col = "LRCtime"
@@ -79,8 +78,8 @@ baseline_df_test = baseline_df[~baseline_df.id.isin(train_ids)]
 print(baseline_df_train.shape, baseline_df_test.shape)
 
 ## train the model
-feat_cols = ["GTVtu_from_mask"]
-# feat_cols = ["ln(GTVtu_from_mask)_zscore"]
+# feat_cols = ["GTVtu_from_mask"]
+feat_cols = ["ln(GTVtu_from_mask)_zscore"]
 
 model = CoxModel(feat_cols=feat_cols,
                  time_col=time_col, id_col="id", event_col=event_col)
@@ -114,79 +113,8 @@ axs, p_vals = plot_kms(
 
 f = axs[0].figure
 
-output_dir = "/home/MED/starkeseb/my_experiments/paper_evaluation_of_dl_approaches/"
-output_file = os.path.join(output_dir, f"clinical_model_kaplan_meier_{feat_cols[0]}.png")
+output_dir = "/home/MED/starkeseb/tmp"
+img_format = "svg"
+output_file = os.path.join(output_dir, f"clinical_model_kaplan_meier_{feat_cols[0]}.{img_format}")
 f.savefig(output_file)
 print("stored KM plot to", output_file)
-
-# # ## Performing cross validation
-
-# # In[24]:
-
-
-
-
-
-# # In[51]:
-
-
-# test_df = baseline_df_test
-
-# feat_cols = [
-#     "volume",
-#     #"Age"
-# ]
-# ci_col = "CI_hazard" # could also use "CI_time"
-
-# folds = repeated_stratified_cv_splits(
-#     ids=train_ids, events=[outcome_dict[pat][1] for pat in train_ids],
-#     cv_k=10, cv_reps=50)
-
-# #print(len(folds), len(folds[0]), len(folds[0][0]), len(folds[0][0][0]), len(folds[0][0][1]))
-# train_cis = []
-# valid_cis = []
-# test_cis = []
-# for rep in range(len(folds)):
-#     for fold in range(len(folds[rep])):
-#         print("rep={}/{}, fold={}/{}".format(rep+1, len(folds), fold+1, len(folds[rep])))
-
-#         train_ids, valid_ids = folds[rep][fold]
-
-#         train_df = baseline_df_train[baseline_df_train.id.isin(train_ids)]
-#         valid_df = baseline_df_train[baseline_df_train.id.isin(valid_ids)]
-
-#         model = CoxModel(feat_cols=feat_cols,
-#                  time_col=time_cols["DKTK"], id_col="id", event_col=event_cols["DKTK"],
-#                  verbose=False)
-
-#         model.fit(train_df)
-
-#         pred_train, perf_train = model.predict(train_df)
-#         pred_valid, perf_valid = model.predict(valid_df)
-#         pred_test, perf_test = model.predict(test_df)
-
-
-#         ci_train = perf_train[ci_col].values[0]
-#         ci_valid = perf_valid[ci_col].values[0]
-#         ci_test = perf_test[ci_col].values[0]
-
-#         print("CI train={}, CI valid={}, CI test={}".format(
-#             ci_train, ci_valid, ci_test))
-
-#         train_cis.append(ci_train)
-#         valid_cis.append(ci_valid)
-#         test_cis.append(ci_test)
-
-
-# # In[52]:
-
-
-# crossval_ci_df = pd.DataFrame({'train_cis': train_cis, 'valid_cis': valid_cis, 'test_cis': test_cis})
-# crossval_ci_df.describe()
-
-
-# # In[ ]:
-
-
-
-
