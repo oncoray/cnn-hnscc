@@ -742,11 +742,16 @@ def crop_3d_around_tumor_center(ct, mask, crop_size, n_random=0, max_pixels_shif
     if n_random < 0:
         n_random = 0
 
+    full_volume = np.sum(mask)
+    print(f"crop_3d_around_tumor_center: ct.shape={ct.shape}, full_volume: {full_volume}")
     # locate the center of mass of the tumor
     properties = regionprops(mask.squeeze())[0]
     center_of_mass = np.round(properties.centroid).astype(int)
     central_crop = crop_3d(ct, crop_size, center_of_mass)
     central_mask = crop_3d(mask, crop_size, center_of_mass)
+
+    print(f"crop_3d_around_tumor_center: central crop: center: {center_of_mass} "
+          f"volume: {np.sum(central_mask)}, volume_fraction: {np.sum(central_mask)/full_volume}")
 
     all_crops = [central_crop]
     all_masks = [central_mask]
@@ -759,10 +764,15 @@ def crop_3d_around_tumor_center(ct, mask, crop_size, n_random=0, max_pixels_shif
 
         center = center_of_mass + offset
         crop = crop_3d(ct, crop_size, center)
-        mask = crop_3d(mask, crop_size, center)
+        crop_mask = crop_3d(mask, crop_size, center)
+
+        crop_volume = np.sum(crop_mask)
+        print(f"crop_3d_around_tumor_center: random crop {i+1}: "
+              f"center: {center}, volume: {crop_volume} "
+              f"volume fraction: {crop_volume/full_volume}")
 
         all_crops.append(crop)
-        all_masks.append(mask)
+        all_masks.append(crop_mask)
         crop_centers.append(center)
 
     return np.array(all_crops), np.array(all_masks), np.array(crop_centers)
