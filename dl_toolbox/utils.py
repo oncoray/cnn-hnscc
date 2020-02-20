@@ -39,33 +39,33 @@ def wrapped_partial(func, *args, **kwargs):
     return partial_func
 
 
-def _subdirectories_full_path(path):
+def subdirectories_full_path(path):
     return [os.path.join(path, d) for d in os.listdir(path)
             if os.path.isdir(os.path.join(path, d))]
 
 
-def _subdirectories_full_path_condition(path, condition):
+def subdirectories_full_path_condition(path, condition):
     """
     condition based on full path
     """
-    subdirs = _subdirectories_full_path(path)
+    subdirs = subdirectories_full_path(path)
     return [d for d in subdirs if condition(d)]
 
 
-def _repetition_dirs(path):
-    return _subdirectories_full_path_condition(
+def repetition_dirs(path):
+    return subdirectories_full_path_condition(
         path, condition=lambda d: os.path.basename(d).startswith("rep_"))
 
 
-def _fold_dirs(path):
-    return _subdirectories_full_path_condition(
+def fold_dirs(path):
+    return subdirectories_full_path_condition(
         path, condition=lambda d: os.path.basename(d).startswith("fold_"))
 
 
-def _get_model_paths(model_cv_dir):
+def get_model_paths(model_cv_dir):
     model_paths = []
-    for rep_path in _repetition_dirs(model_cv_dir):
-        for fold_path in _fold_dirs(rep_path):
+    for rep_path in repetition_dirs(model_cv_dir):
+        for fold_path in fold_dirs(rep_path):
             model_paths.append(
                 os.path.join(fold_path, "trained_model.h5"))
     return model_paths

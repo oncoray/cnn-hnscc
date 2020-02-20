@@ -6,57 +6,56 @@ import matplotlib.pyplot as plt
 from dl_toolbox.cross_validation.ensemble import get_ensemble_preds_from_cv_results
 from dl_toolbox.data.read import read_outcome
 from dl_toolbox.visualization.kaplan_meier import plot_kms
+from dl_toolbox.utils import parse_list_from_string, repetition_dirs, fold_dirs
 
-from create_ensemble_manually import read_fold_predictions
+
+def read_fold_predictions(result_dir):
+
+    fold_predictions = {}
+    for r, rep in enumerate(repetition_dirs(result_dir)):
+        fold_predictions[r] = {}
+        for f, fold in enumerate(fold_dirs(rep)):
+            pred_df = pd.read_csv(
+                os.path.join(fold, "predictions", "predictions.csv"))
+
+            # fix the columns that contain lists which are now strings
+            for c in ["pred_per_slice"]:#, "slice_idx"]:
+                vals = pred_df[c].values
+                vals_fixed = []
+                for v in vals:
+                    # print(v)
+                    v_fixed = parse_list_from_string(v, sep=" ")
+                    # print(v_fixed)
+                    vals_fixed.append(v_fixed)
+
+                new_c = c + "_fixed"
+                pred_df[new_c] = vals_fixed
+                # remove old column and rename new one to old name
+                pred_df.drop([c], axis=1, inplace=True)
+                pred_df.rename({new_c: c}, axis=1, inplace=True)
+            fold_predictions[r][f] = pred_df
+
+    return fold_predictions
 
 
-result_dir = ("/home/MED/starkeseb/g40fs4-hprt/HPRT-Data/ONGOING_PROJECTS/"
-             "Radiomics/RadiomicsAnalysis/Project/DeepRadiomics_Sebastian/"
-             "Experiments/paper_evaluation_of_dl_approaches")
+result_dir = ("/home/MED/starkeseb/my_experiments/"
+              "paper_evaluation_of_dl_approaches")
 
 # for the scientific reports paper
-# model_dirs = [
-#     "transfer_learning_densenet201_last_preproc",
-#     "from_scratch_cox_tanh_no_bn",
-#     "from_scratch_3d_16_sample_per_patient_no_augmentation"
-# ]
-# # for extension of the ylabel
-# labels = [
-#     "Transfer learning",
-#     "2D-CNN",
-#     "3D-CNN"
-# ]
-
-# for the MIDL 2020 submission: 2D,
 model_dirs = [
-    # "from_scratch_2d_64x64_1_sample_per_patient_no_augmentation",
-    "from_scratch_2d_64x64_1_sample_per_patient",
-    # "from_scratch_2d_64x64_32_sample_per_patient_no_augmentation",
-    "from_scratch_2d_64x64_32_sample_per_patient",
+    "transfer_learning_densenet201_last_preproc",
+    "from_scratch_cox_tanh_no_bn",
+    "from_scratch_3d_16_sample_per_patient_no_augmentation"
 ]
+# for extension of the ylabel
 labels = [
-    # "2D-CNN, 1 sample, no augmentation",
-    "2D-CNN, 1 sample",
-    # "2D-CNN, 32 samples, no augmentation",
-    "2D-CNN, 32 samples"
+    "Transfer learning",
+    "2D-CNN",
+    "3D-CNN"
 ]
-
-# for the MIDL 2020 submission: 3D,
-# model_dirs = [
-#     "from_scratch_3d_1_sample_per_patient_no_augmentation",
-#     # "from_scratch_3d_1_sample_per_patient",
-#     "from_scratch_3d_16_sample_per_patient_no_augmentation",
-#     # "from_scratch_3d",
-# ]
-# labels = [
-#     "3D-CNN, 1 sample, no augmentation",
-#     # "3D-CNN, 1 sample",
-#     "3D-CNN, 16 samples, no augmentation",
-#     # "3D-CNN, 16 samples"
-# ]
-
 
 output_dir = "/home/MED/starkeseb/tmp/"
+img_format = "svg"
 
 outcome_dict = read_outcome(
     "/home/MED/starkeseb/mbro_local/data/DKTK/outcome.csv",
@@ -128,11 +127,11 @@ for i, model_dir in enumerate(model_dirs):
     axs2[i, 1].set_title("Test")
 
 f.tight_layout()
-output_file = os.path.join(output_dir, "ensemble_kaplan_meiers.png")
+output_file = os.path.join(output_dir, f"ensemble_kaplan_meiers.{img_format}")
 f.savefig(output_file)
 print("KM plot saved to", output_file)
 
 f2.tight_layout()
-output_file = os.path.join(output_dir, "ensemble_kaplan_meiers_without_validation.png")
+output_file = os.path.join(output_dir, f"ensemble_kaplan_meiers_without_validation.{img_format}")
 f2.savefig(output_file)
 print("KM plot saved to", output_file)

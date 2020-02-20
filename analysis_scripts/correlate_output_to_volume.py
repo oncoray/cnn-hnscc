@@ -6,7 +6,7 @@ from scipy.stats import spearmanr
 
 from dl_toolbox.data.read import read_baseline_feats
 
-from dl_toolbox.utils import _repetition_dirs, _fold_dirs, _subdirectories_full_path
+from dl_toolbox.utils import repetition_dirs, fold_dirs, subdirectories_full_path
 
 
 if __name__ == "__main__":
@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     # for obtaining the volume data
     data_path_base = "/home/MED/starkeseb/mbro_local/data/DKTK/"
-    data_subdirs = _subdirectories_full_path(data_path_base)  # the subcohorts
+    data_subdirs = subdirectories_full_path(data_path_base)  # the subcohorts
     baseline_files = [os.path.join(d, "numpy_preprocessed", "clinical_features.csv") for d in data_subdirs]
     vol_col = "ln(GTVtu_from_mask)_zscore"
     baseline_df = read_baseline_feats(baseline_files)
@@ -35,8 +35,8 @@ if __name__ == "__main__":
     pearsons_test = []
     pearsons_full = []
     exp_dir = []
-    for rep_dir in _repetition_dirs(model_cv_dir):
-        for fold_dir in _fold_dirs(rep_dir):
+    for rep_dir in repetition_dirs(model_cv_dir):
+        for fold_dir in fold_dirs(rep_dir):
             prediction_file = os.path.join(fold_dir, "predictions", "predictions.csv")
             predictions = pd.read_csv(prediction_file)
 
