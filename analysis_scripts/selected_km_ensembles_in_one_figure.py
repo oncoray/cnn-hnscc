@@ -43,13 +43,13 @@ result_dir = ("/home/MED/starkeseb/my_experiments/"
 
 # for the scientific reports paper
 model_dirs = [
-    "transfer_learning_densenet201_last_preproc",
+    "from_scratch_3d_16_sample_per_patient_no_augmentation",
     "from_scratch_cox_tanh_no_bn",
-    "from_scratch_3d_16_sample_per_patient_no_augmentation"
+    "transfer_learning_densenet201_last_preproc",
 ]
 # for extension of the ylabel
 labels = [
-    "Transfer learning",
+    "Transfer learning (DenseNet201)",
     "2D-CNN",
     "3D-CNN"
 ]
@@ -105,6 +105,7 @@ for i, model_dir in enumerate(model_dirs):
         save_dir=None,
         axs=axs[i,:],
         y_label=labels[i] + "\n\nLoco-regional tumour control",
+        titles=["Training", "Internal test", "Independent validation"],
         set_titles=i==0,
         table_below_scaling=0.17)
 
