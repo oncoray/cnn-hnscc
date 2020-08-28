@@ -65,3 +65,19 @@ tab = table(data$cohort, data$LRC)
 barplot(prop.table(tab, 1), beside=TRUE, legend.text=TRUE)
 chisq.test(tab)$p.value
 
+# smoking
+tab = table(data$cohort, data$Smoking..0..never..1.yes)
+barplot(prop.table(tab, 1), beside=TRUE, legend.text=TRUE)
+chisq.test(tab)$p.value
+
+
+# alcohol
+tab = table(data$cohort, data$Alcohol..0.never..1.yes)
+barplot(prop.table(tab, 1), beside=TRUE, legend.text=TRUE)
+chisq.test(tab)$p.value
+
+
+# keratin
+tab = table(data$cohort, data$Keratinisierung)
+barplot(prop.table(tab, 1), beside=TRUE, legend.text=TRUE)
+chisq.test(tab)$p.value
