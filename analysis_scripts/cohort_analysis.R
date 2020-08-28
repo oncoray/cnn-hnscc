@@ -7,20 +7,20 @@ names = colnames(data)
 
 
 # Mann-Whitney-U test for continuous variables
-wilcox.test(data$GTVtu_from_mask ~ data$cohort, paired=FALSE, alternative="two.sided", na.action=na.omit)
+wilcox.test(data$GTVtu_from_mask_cm3 ~ data$cohort, paired=FALSE, alternative="two.sided", na.action=na.omit)
 #wilcox.test(data$LRCtime ~ data$cohort, paired=FALSE, alternative="two.sided", na.action=na.omit)
 wilcox.test(data$Age ~ data$cohort, paired=FALSE, alternative="two.sided", na.action=na.omit)
 
 # for the follow up time we only consider the patients that are alive
-patients_alive = data[data$OS == 1,]
+patients_alive = data[data$OS == 0,]
 #summary(patients_alive)
 
-patients_alive_train = patients_alive[patients_alive$cohort == "training",]
-summary(patients_alive_train$LRCtime)
+patients_alive_train = patients_alive[patients_alive$cohort == "train",]
+summary(patients_alive_train$OStime)
 patients_alive_test = patients_alive[patients_alive$cohort == "test",]
-summary(patients_alive_test$LRCtime)
+summary(patients_alive_test$OStime)
 
-wilcox.test(patients_alive$LRCtime ~ patients_alive$cohort, paired=FALSE, alternative="two.sided", na.action=na.omit)
+wilcox.test(patients_alive$OStime ~ patients_alive$cohort, paired=FALSE, alternative="two.sided", na.action=na.omit)
 # Chi-squared test for categorical variables
 # gender
 tab = table(data$cohort, data$Gender)
