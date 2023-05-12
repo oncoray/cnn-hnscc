@@ -46,10 +46,10 @@ def read_outcome(outcome_file, id_col, time_col, event_col, dropna=True, csv_sep
                 len_old - len_new))
 
     outcome_dict = pandas_outcome_to_dict(
-            outcome,
-            id_col=id_col,
-            survival_col=time_col,
-            event_col=event_col)
+        outcome,
+        id_col=id_col,
+        survival_col=time_col,
+        event_col=event_col)
 
     # provide some statistics on distribution of times for each cohort
     all_times = [outcome_dict[pat][0] for pat in outcome_dict]
@@ -100,8 +100,8 @@ def read_img_data(img_directories, n_around_max, whitelist, img_fn="ct", mask_fn
                 print("\nskipping", pat, "because no outcome available")
                 continue
 
-            #time, event = outcomes[cohort][pat]
-            #if event == 0 and time < 12:
+            # time, event = outcomes[cohort][pat]
+            # if event == 0 and time < 12:
             #    print("skipping", pat, "because censored before 12 months: time={}, event={}".format(
             #        time, event))
             #    continue
@@ -117,12 +117,13 @@ def read_img_data(img_directories, n_around_max, whitelist, img_fn="ct", mask_fn
                 ct = np.load(os.path.join(pat_path, img_fn + ".npz"))["arr_0"]
             else:
                 ct = np.load(os.path.join(pat_path, img_fn + ".npy"))
-            #print("read CT for", pat)
+            # print("read CT for", pat)
             if ".npz" in file_extensions_roi:
-                roi = np.load(os.path.join(pat_path, mask_fn + ".npz"))["arr_0"]
+                roi = np.load(os.path.join(
+                    pat_path, mask_fn + ".npz"))["arr_0"]
             else:
                 roi = np.load(os.path.join(pat_path, mask_fn + ".npy"))
-            #print("read mask for", pat)
+            # print("read mask for", pat)
 
             # Now only select the necessary slices
             ct, roi, slice_idx = extract_slices_around_largest_tumor(
@@ -133,7 +134,7 @@ def read_img_data(img_directories, n_around_max, whitelist, img_fn="ct", mask_fn
 
             print("\r{}/{}: {} {}, {}\t".format(
                 count+1, len(pat_dirs), pat, ct.shape, roi.shape),
-                  end="", flush=True)
+                end="", flush=True)
 
             count += 1
 
@@ -216,17 +217,35 @@ def read_patient_data(img_directories,
                       id_col,
                       n_around_max,
                       preproc_fun=None,
-                      csv_sep=";"):
+                      dropna=True,
+                      csv_sep=";",
+                      img_fn="ct",
+                      mask_fn="roi",
+                      whitelist=None,
+                      ):
     """
     A wrapper to quickly read all relevant data which is
     used in our lab.
+
+    Returns
+    -------
+    outcomes: dict, where keys are patient ids and values
+              are the event time and censoring indicator.
+    img_data: dict, where keys are patient ids and values
+              are another dictionary with keys 'img', 'mask'
+              containing the image data
     """
+
     outcomes = read_outcome(
-        outcome_file, id_col, time_col, event_col, dropna=True, csv_sep=csv_sep)
+        outcome_file, id_col, time_col, event_col, dropna=dropna, csv_sep=csv_sep)
 
     all_ids = list(outcomes.keys())
+    if whitelist is None:
+        whitelist = all_ids
+
     img_data = read_img_data(
-        img_directories, n_around_max, whitelist=all_ids)
+        img_directories, n_around_max, whitelist=whitelist, img_fn=img_fn,
+        mask_fn=mask_fn)
 
     # check that we have outcome available for all image data
     assert set(list(img_data.keys())).issubset(set(all_ids))
@@ -243,6 +262,5 @@ def read_patient_data(img_directories,
             img_data[pat]['img'] = img_new
             img_data[pat]['mask'] = roi_new
             outcomes[pat] = lab_new
-
 
     return outcomes, img_data
